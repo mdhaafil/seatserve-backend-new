@@ -1,62 +1,71 @@
 import Hapi from "@hapi/hapi";
 import Inert from "@hapi/inert";
 import path from "path";
-import { connectDB } from "./database/mongo";
 import dotenv from "dotenv";
 
-dotenv.config();
+import { connectDB } from "./database/mongo";
 
 // Routes
-
 import { productRoutes } from "./api/product/router";
-
 import contactRoutes from "./api/contact/router";
 import seatRoutes from "./api/seat/router";
-import { seedSeats } from "./api/seat/seed";
+// import { seedSeats } from "./api/seat/seed";
 import cartRoutes from "./api/cart/router";
 import { paymentRoutes } from "./api/order/router";
 import { authRoutes } from "./api/auth/router";
 
+dotenv.config();
+
 const startServer = async () => {
-  await connectDB();
-  // await seedSeats();
+  try {
+    console.log("🚀 Starting server...");
 
-  const server = Hapi.server({
-  port: Number(process.env.PORT) || 5000,
-  host: "0.0.0.0",
-  routes: {
-    cors: true,
-    files: {
-      relativeTo: path.join(__dirname, ".."),
-    },
-  },
-});
+    await connectDB();
+    console.log("✅ MongoDB connected");
 
-  // 🔥 Register inert (static files)
-  await server.register(Inert);
+    // await seedSeats();
 
-  // 🔥 Static uploads route
-  server.route({
-    method: "GET",
-    path: "/uploads/{param*}",
-    handler: {
-      directory: {
-        path: "uploads",
-        listing: false,
+    const server = Hapi.server({
+      port: Number(process.env.PORT) || 5000,
+      host: "0.0.0.0",
+      routes: {
+        cors: true,
+        files: {
+          relativeTo: path.join(__dirname, ".."),
+        },
       },
-    },
-  });
+    });
 
-  // API routes
-  server.route(productRoutes);
-  server.route(authRoutes);
-  server.route(contactRoutes);
-  server.route(seatRoutes);
-  server.route(cartRoutes);
-  server.route(paymentRoutes);
+    // Register inert
+    await server.register(Inert);
 
-  await server.start();
-  console.log(`🚀 Server running on ${server.info.uri}`);
+    // Static uploads route
+    server.route({
+      method: "GET",
+      path: "/uploads/{param*}",
+      handler: {
+        directory: {
+          path: "uploads",
+          listing: false,
+        },
+      },
+    });
+
+    // API routes
+    server.route(productRoutes);
+    server.route(authRoutes);
+    server.route(contactRoutes);
+    server.route(seatRoutes);
+    server.route(cartRoutes);
+    server.route(paymentRoutes);
+
+    await server.start();
+
+    console.log(`✅ Server running on ${server.info.uri}`);
+  } catch (error) {
+    console.error("❌ Startup Error:", error);
+    process.exit(1);
+  }
 };
 
 startServer();
