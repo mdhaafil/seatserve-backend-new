@@ -35,6 +35,7 @@ const startServer = async () => {
         },
       },
     });
+    
 
     // Register inert
     await server.register(Inert);
