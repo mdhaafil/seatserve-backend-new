@@ -19,7 +19,7 @@ import { authRoutes } from "./api/auth/router";
 
 const startServer = async () => {
   await connectDB();
-  await seedSeats();
+  // await seedSeats();
 
   const server = Hapi.server({
   port: Number(process.env.PORT) || 5000,
