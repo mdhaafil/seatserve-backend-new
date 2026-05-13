@@ -22,15 +22,15 @@ const startServer = async () => {
   await seedSeats();
 
   const server = Hapi.server({
-    port: 5000,
-    host: "localhost",
-    routes: {
-      cors: true,
-      files: {
-        relativeTo: path.join(__dirname, ".."), // 🔥 IMPORTANT
-      },
+  port: Number(process.env.PORT) || 5000,
+  host: "0.0.0.0",
+  routes: {
+    cors: true,
+    files: {
+      relativeTo: path.join(__dirname, ".."),
     },
-  });
+  },
+});
 
   // 🔥 Register inert (static files)
   await server.register(Inert);
